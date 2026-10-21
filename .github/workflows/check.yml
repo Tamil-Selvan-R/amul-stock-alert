@@ -1,0 +1,46 @@
+name: Check Amul stock
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      test_message:
+        description: "Send test message"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stock-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check stock
+        env:
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
+          TEST_MESSAGE: ${{ inputs.test_message && '1' || '0' }}
+        run: python check_stock.py
+
+      - name: Save state if it changed
+        run: |
+          if [ -n "$(git status --porcelain state.json)" ]; then
+            git config user.name "stock-bot"
+            git config user.email "stock-bot@users.noreply.github.com"
+            git add state.json
+            git commit -m "Update stock state"
+            git push
+          fi
