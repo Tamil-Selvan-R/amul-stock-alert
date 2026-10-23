@@ -108,3 +108,48 @@ def test_keepalive_monthly():
     assert state["keepalive"] == "2026-01-01"
     keepalive(state, datetime.date(2026, 2, 5))
     assert state["keepalive"] == "2026-02-05"
+
+
+# --- not getting blocked ----------------------------------------------------
+
+from check_stock import Blocked, in_backoff, looks_blocked, read  # noqa: E402
+
+NOW = datetime.datetime(2026, 10, 23, 12, 0, tzinfo=datetime.timezone.utc)
+
+
+def test_captcha_page_is_blocked():
+    import pytest
+    with pytest.raises(Blocked):
+        read("<title>Just a moment...</title><div>Checking your browser</div>")
+
+
+def test_captcha_word_on_real_product_page_is_ignored():
+    html = '<script src="recaptcha.js"></script><p>WPCCP03_01</p><b>In Stock</b>'
+    assert looks_blocked(html) and read(html) == "in"
+
+
+def test_backoff_grows_and_resets(monkeypatch):
+    use_notify(monkeypatch)
+    state = {"status": "out", "failures": 0}
+    waits = []
+    for _ in range(6):
+        state = run(state, "blocked", now=NOW)
+        until = datetime.datetime.fromisoformat(state["backoff_until"])
+        waits.append(int((until - NOW).total_seconds() // 60))
+    assert waits == [15, 30, 60, 120, 240, 240]
+    assert in_backoff(state, NOW) and not in_backoff(state, NOW + datetime.timedelta(hours=5))
+    state = run(state, "out", now=NOW)
+    assert "blocks" not in state and "backoff_until" not in state
+
+
+def test_retry_after_is_respected(monkeypatch):
+    use_notify(monkeypatch)
+    state = run({"status": "out"}, "blocked", now=NOW, retry_after=3600)
+    assert datetime.datetime.fromisoformat(state["backoff_until"]) - NOW == datetime.timedelta(hours=1)
+
+
+def test_block_warning_says_blocked(monkeypatch):
+    sent = use_notify(monkeypatch).sent
+    state = {"status": "out", "failures": 7}
+    run(state, "blocked", now=NOW)
+    assert "blocked" in sent[0]

@@ -72,3 +72,25 @@ def test_without_pincode_page_is_unknown():
         assert parse_stock(fetch_with_browser(url, pincode="")) == "unknown"
     finally:
         server.shutdown()
+
+
+def test_plain_fetch_429_raises_blocked():
+    from check_stock import Blocked, fetch
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(429)
+            self.send_header("Retry-After", "120")
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        with pytest.raises(Blocked) as info:
+            fetch(f"http://127.0.0.1:{server.server_port}/")
+        assert info.value.retry_after == 120
+    finally:
+        server.shutdown()

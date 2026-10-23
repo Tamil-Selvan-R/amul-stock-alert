@@ -10,14 +10,18 @@ Environment variables (all optional except at least one alert channel):
   TELEGRAM_CHAT_ID    optional backup channel: your chat id
   STATE_FILE          where the last result is remembered (default: state.json)
   USE_BROWSER         "auto" (default), "always" or "never"
+  JITTER_SECONDS      wait a random 0..N seconds before checking (default 0)
   TEST_MESSAGE=1      only send a test message and exit
 """
 
 import datetime
 import json
 import os
+import random
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -33,11 +37,29 @@ USE_BROWSER = os.environ.get("USE_BROWSER", "auto").lower()
 FAILURE_ALERT_AFTER = 8  # 8 checks x 15 min = 2 hours of failures
 KEEPALIVE_DAYS = 30  # GitHub pauses schedules after 60 days without commits
 WINDOW = 1500  # characters after the product code to inspect
+JITTER_SECONDS = int(os.environ.get("JITTER_SECONDS", "0"))
+BACKOFF_MINUTES = [15, 30, 60, 120, 240]  # wait longer after each block in a row
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 )
+HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-IN,en;q=0.9",
+}
+
+# Signs that the shop refused us instead of showing the product.
+BLOCK_CODES = {403, 429, 503}
+BLOCK_MARKERS = [
+    r"captcha",
+    r"access\s*denied",
+    r"just\s*a\s*moment",
+    r"attention\s*required",
+    r"unusual\s*traffic",
+    r"request\s*blocked",
+]
 
 OUT_PATTERNS = [
     r"out\s*of\s*stock",
@@ -56,10 +78,37 @@ IN_PATTERNS = [
 ]
 
 
+class Blocked(Exception):
+    def __init__(self, reason, retry_after=0):
+        super().__init__(reason)
+        self.retry_after = retry_after  # seconds the shop asked us to wait
+
+
+def _retry_after(value):
+    try:
+        return int(value or 0)
+    except ValueError:
+        return 0
+
+
 def fetch(url):
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return resp.read().decode("utf-8", errors="replace")
+    req = urllib.request.Request(url, headers=HEADERS)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        if exc.code in BLOCK_CODES:
+            raise Blocked(f"HTTP {exc.code}", _retry_after(exc.headers.get("Retry-After")))
+        raise
+
+
+def looks_blocked(html):
+    """True if the page looks like a block or captcha page.
+
+    Only used when the product code wasn't found: a normal product page may
+    mention "captcha" in a login form, and that must not hide a restock.
+    """
+    return any(re.search(p, html, re.I) for p in BLOCK_MARKERS)
 
 
 def fetch_with_browser(url, pincode=PINCODE):
@@ -81,7 +130,9 @@ def fetch_with_browser(url, pincode=PINCODE):
         try:
             page = browser.new_page(user_agent=USER_AGENT, locale="en-IN")
             page.on("response", on_response)
-            page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            if resp and resp.status in BLOCK_CODES:
+                raise Blocked(f"HTTP {resp.status}", _retry_after(resp.headers.get("retry-after")))
             page.wait_for_timeout(3000)
             if pincode:
                 _enter_pincode(page, pincode)
@@ -137,21 +188,41 @@ def parse_stock(html, sku=PRODUCT_SKU):
     return "out" if "out" in verdicts else "in"
 
 
+def read(html):
+    status = parse_stock(html)
+    if status == "unknown" and looks_blocked(html):
+        raise Blocked("block or captcha page")
+    return status
+
+
 def check():
-    """Return (status, method). Tries a plain download first, then a browser."""
-    status = "unknown"
+    """Return (status, method, retry_after).
+
+    status is "in", "out", "unknown" (couldn't tell) or "blocked" (the shop
+    refused us). Tries a plain download first, then a real browser.
+    """
+    status, retry_after = "unknown", 0
     if USE_BROWSER != "always":
         try:
-            status = parse_stock(fetch(PRODUCT_URL))
-        except Exception as exc:  # network error, blocked, timeout
+            status = read(fetch(PRODUCT_URL))
+        except Blocked as exc:
+            print("Plain fetch blocked:", exc)
+            status, retry_after = "blocked", exc.retry_after
+        except Exception as exc:  # network error, timeout
             print("Plain fetch failed:", exc)
-        if status != "unknown" or USE_BROWSER == "never":
-            return status, "plain"
+        # A 429 means "too many requests": a browser from the same address
+        # would only make it worse, so stop here.
+        if status in ("in", "out") or retry_after or USE_BROWSER == "never":
+            return status, "plain", retry_after
     try:
-        status = parse_stock(fetch_with_browser(PRODUCT_URL))
+        status = read(fetch_with_browser(PRODUCT_URL))
+    except Blocked as exc:
+        print("Browser blocked:", exc)
+        status, retry_after = "blocked", exc.retry_after
     except Exception as exc:
         print("Browser check failed:", exc)
-    return status, "browser"
+        status = "unknown"
+    return status, "browser", retry_after
 
 
 def send_whatsapp(text):
@@ -219,13 +290,26 @@ def keepalive(state, today=None):
         state["keepalive"] = today.isoformat()
 
 
-def run(state, status):
+def in_backoff(state, now):
+    until = state.get("backoff_until")
+    return bool(until) and now < datetime.datetime.fromisoformat(until)
+
+
+def run(state, status, now=None, retry_after=0):
     """Update state for one check result and send any alerts. Returns state."""
-    if status == "unknown":
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    if status in ("unknown", "blocked"):
         state["failures"] = state.get("failures", 0) + 1
+        if status == "blocked":
+            state["blocks"] = state.get("blocks", 0) + 1
+            step = BACKOFF_MINUTES[min(state["blocks"], len(BACKOFF_MINUTES)) - 1]
+            wait = max(step * 60, retry_after)
+            state["backoff_until"] = (now + datetime.timedelta(seconds=wait)).isoformat()
+            print(f"Blocked {state['blocks']} time(s) in a row; pausing {wait // 60} min.")
         if state["failures"] == FAILURE_ALERT_AFTER:
+            reason = "is being blocked by" if status == "blocked" else "couldn't read"
             notify(
-                "⚠️ Amul stock bot couldn't read the product page for 2 hours. "
+                f"⚠️ Amul stock bot {reason} the product page for a while. "
                 "It keeps trying; check the Actions tab on GitHub if this continues."
             )
         return state
@@ -233,6 +317,8 @@ def run(state, status):
     if state.get("failures", 0) >= FAILURE_ALERT_AFTER:
         notify("✅ Amul stock bot can read the page again.")
     state["failures"] = 0
+    state.pop("blocks", None)
+    state.pop("backoff_until", None)
 
     if status == "in" and state.get("status") != "in":
         delivered = notify(f"🟢 Back in stock! {PRODUCT_NAME}\n{PRODUCT_URL}")
@@ -249,9 +335,17 @@ def main():
         ok = notify("✅ Amul stock bot is connected. You'll get a message here when it's back in stock.")
         return 0 if ok else 1
 
-    status, method = check()
+    state = load_state()
+    now = datetime.datetime.now(datetime.timezone.utc)
+    if in_backoff(state, now):
+        print("Paused after being blocked until", state["backoff_until"], "- skipping this check.")
+        return 0
+
+    if JITTER_SECONDS:
+        time.sleep(random.uniform(0, JITTER_SECONDS))  # don't hit the shop at exact times
+    status, method, retry_after = check()
     print(f"Status: {status} (via {method})")
-    state = run(load_state(), status)
+    state = run(state, status, retry_after=retry_after)
     keepalive(state)
     save_state(state)
     return 0
