@@ -13,6 +13,10 @@ on:
         description: "Save a copy of the page to the debug folder"
         type: boolean
         default: false
+      pincode:
+        description: "Try a different pincode this run (visible in the run, leave empty normally)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -25,7 +29,7 @@ jobs:
   check:
     # Pinned: Playwright's installer may not support the newest Ubuntu yet.
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
 
@@ -44,7 +48,7 @@ jobs:
 
       - name: Check stock
         env:
-          PINCODE: ${{ secrets.PINCODE }}
+          PINCODE: ${{ inputs.pincode || secrets.PINCODE }}
           WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
           CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
