@@ -147,7 +147,7 @@ def fetch_with_browser(url, pincode=PINCODE):
                           "response_start": body})
 
     counts = {"loaded": 0, "skipped": 0}
-    loaded_hosts, skipped_hosts = set(), set()
+    loaded_hosts, skipped_hosts, skipped_urls = set(), set(), set()
 
     def trim(route):
         # The bot only needs the page's code and data. Skipping pictures,
@@ -157,6 +157,7 @@ def fetch_with_browser(url, pincode=PINCODE):
         if req.resource_type in SKIP_TYPES or any(t in host for t in SKIP_HOSTS):
             counts["skipped"] += 1
             skipped_hosts.add(host)
+            skipped_urls.add(req.url)
             route.abort()
         else:
             counts["loaded"] += 1
@@ -185,12 +186,22 @@ def fetch_with_browser(url, pincode=PINCODE):
             if DEBUG_DIR:
                 cookies = [{"name": c["name"], "domain": c["domain"]} for c in page.context.cookies()]
                 save_debug("network.json", json.dumps(
-                    {"requests": counts, "loaded_hosts": sorted(loaded_hosts),
+                    {"requests": counts, "skipped_unique": len(skipped_urls),
+                     "skipped_by_type": _count_types(skipped_urls), "loaded_hosts": sorted(loaded_hosts),
                      "skipped_hosts": sorted(skipped_hosts), "calls": calls, "cookies": cookies}, indent=2))
                 _try_feed_directly(calls)
             return page.content() + "\n" + "\n".join(captured)
         finally:
             browser.close()
+
+
+def _count_types(urls):
+    """Debug only: rough file types of skipped addresses."""
+    kinds = {}
+    for u in urls:
+        ext = os.path.splitext(urllib.parse.urlparse(u).path)[1].lower() or "(none)"
+        kinds[ext] = kinds.get(ext, 0) + 1
+    return dict(sorted(kinds.items(), key=lambda kv: -kv[1])[:8])
 
 
 def _try_feed_directly(calls):
