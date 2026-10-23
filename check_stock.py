@@ -119,13 +119,26 @@ def fetch_with_browser(url, pincode=PINCODE):
     from playwright.sync_api import sync_playwright
 
     captured = []
+    calls = []  # debug only: which data addresses the page used
 
     def on_response(resp):
-        if "json" in resp.headers.get("content-type", ""):
+        is_json = "json" in resp.headers.get("content-type", "")
+        if is_json:
             try:
                 captured.append(resp.text())
             except Exception:
                 pass
+        if DEBUG_DIR and "/api/" in resp.url:
+            req = resp.request
+            headers = {k: (v if k.lower() not in ("cookie", "authorization") else "<hidden>")
+                       for k, v in req.headers.items()}
+            try:
+                body = resp.text()[:600] if is_json else ""
+            except Exception:
+                body = ""
+            calls.append({"method": req.method, "url": resp.url, "status": resp.status,
+                          "request_headers": headers, "post_data": (req.post_data or "")[:600],
+                          "response_start": body})
 
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"])
@@ -140,6 +153,9 @@ def fetch_with_browser(url, pincode=PINCODE):
                 _enter_pincode(page, pincode)
             page.wait_for_load_state("networkidle", timeout=20000)
             page.wait_for_timeout(2000)
+            if DEBUG_DIR:
+                cookies = [{"name": c["name"], "domain": c["domain"]} for c in page.context.cookies()]
+                save_debug("network.json", json.dumps({"calls": calls, "cookies": cookies}, indent=2))
             return page.content() + "\n" + "\n".join(captured)
         finally:
             browser.close()
