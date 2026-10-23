@@ -175,8 +175,13 @@ def fetch_with_browser(url, pincode=PINCODE):
             page.wait_for_timeout(3000)
             if pincode:
                 _enter_pincode(page, pincode)
-            page.wait_for_load_state("networkidle", timeout=20000)
-            page.wait_for_timeout(2000)
+            # Wait for the product's stock data rather than for the page to go
+            # quiet: with trackers skipped, the page may keep retrying them.
+            deadline = time.time() + 20
+            while time.time() < deadline and not any(
+                    PRODUCT_SKU in c and '"available"' in c for c in captured):
+                page.wait_for_timeout(500)
+            page.wait_for_timeout(1500)
             if DEBUG_DIR:
                 cookies = [{"name": c["name"], "domain": c["domain"]} for c in page.context.cookies()]
                 save_debug("network.json", json.dumps(
