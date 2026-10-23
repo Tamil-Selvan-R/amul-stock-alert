@@ -20,6 +20,7 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 import time
 import urllib.error
@@ -283,6 +284,8 @@ def check():
     refused us). Tries a plain download first, then a real browser.
     """
     status, retry_after = "unknown", 0
+    if DEBUG_DIR:
+        shutil.rmtree(DEBUG_DIR, ignore_errors=True)  # no stale files from older runs
     if USE_BROWSER != "always":
         try:
             status = read(fetch(PRODUCT_URL), "plain")
@@ -302,6 +305,7 @@ def check():
         status, retry_after = "blocked", exc.retry_after
     except Exception as exc:
         print("Browser check failed:", exc)
+        save_debug("browser-error.txt", f"{type(exc).__name__}: {exc}\n")
         status = "unknown"
     return status, "browser", retry_after
 
