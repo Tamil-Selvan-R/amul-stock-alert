@@ -12,6 +12,7 @@ Environment variables (all optional except at least one alert channel):
   USE_BROWSER         "auto" (default), "always" or "never"
   JITTER_SECONDS      wait a random 0..N seconds before checking (default 0)
   TEST_MESSAGE=1      only send a test message and exit
+  DEBUG_DIR           if set, save what each method saw into this folder
 """
 
 import datetime
@@ -39,6 +40,7 @@ KEEPALIVE_DAYS = 30  # GitHub pauses schedules after 60 days without commits
 WINDOW = 1500  # characters after the product code to inspect
 JITTER_SECONDS = int(os.environ.get("JITTER_SECONDS", "0"))
 BACKOFF_MINUTES = [15, 30, 60, 120, 240]  # wait longer after each block in a row
+DEBUG_DIR = os.environ.get("DEBUG_DIR", "").strip()
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -188,8 +190,19 @@ def parse_stock(html, sku=PRODUCT_SKU):
     return "out" if "out" in verdicts else "in"
 
 
-def read(html):
+def save_debug(name, text):
+    """Keep a copy of what the bot saw, to tune it against the real page."""
+    if not DEBUG_DIR:
+        return
+    os.makedirs(DEBUG_DIR, exist_ok=True)
+    with open(os.path.join(DEBUG_DIR, name), "w") as f:
+        f.write(text[:400_000])
+
+
+def read(html, name="page"):
+    save_debug(name + ".html", html)
     status = parse_stock(html)
+    save_debug(name + "-result.txt", f"status={status} sku_found={PRODUCT_SKU.lower() in html.lower()} length={len(html)}\n")
     if status == "unknown" and looks_blocked(html):
         raise Blocked("block or captcha page")
     return status
@@ -204,7 +217,7 @@ def check():
     status, retry_after = "unknown", 0
     if USE_BROWSER != "always":
         try:
-            status = read(fetch(PRODUCT_URL))
+            status = read(fetch(PRODUCT_URL), "plain")
         except Blocked as exc:
             print("Plain fetch blocked:", exc)
             status, retry_after = "blocked", exc.retry_after
@@ -212,10 +225,10 @@ def check():
             print("Plain fetch failed:", exc)
         # A 429 means "too many requests": a browser from the same address
         # would only make it worse, so stop here.
-        if status in ("in", "out") or retry_after or USE_BROWSER == "never":
+        if (status in ("in", "out") and not DEBUG_DIR) or retry_after or USE_BROWSER == "never":
             return status, "plain", retry_after
     try:
-        status = read(fetch_with_browser(PRODUCT_URL))
+        status = read(fetch_with_browser(PRODUCT_URL), "browser")
     except Blocked as exc:
         print("Browser blocked:", exc)
         status, retry_after = "blocked", exc.retry_after

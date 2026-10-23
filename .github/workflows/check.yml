@@ -9,6 +9,10 @@ on:
         description: "Send test message"
         type: boolean
         default: false
+      debug:
+        description: "Save a copy of the page to the debug folder"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -46,15 +50,17 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TEST_MESSAGE: ${{ inputs.test_message && '1' || '0' }}
-          JITTER_SECONDS: "45"
+          JITTER_SECONDS: ${{ inputs.debug && '0' || '45' }}
+          DEBUG_DIR: ${{ inputs.debug && 'debug' || '' }}
         run: python check_stock.py
 
       - name: Save state if it changed
         run: |
-          if [ -n "$(git status --porcelain state.json)" ]; then
+          if [ -n "$(git status --porcelain state.json debug)" ]; then
             git config user.name "stock-bot"
             git config user.email "stock-bot@users.noreply.github.com"
             git add state.json
+            if [ -d debug ]; then git add debug; fi
             git commit -m "Update stock state"
             git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push
