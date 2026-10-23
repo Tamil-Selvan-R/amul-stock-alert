@@ -54,6 +54,8 @@ HEADERS = {
 
 # Browser requests the bot doesn't need.
 SKIP_TYPES = {"image", "media", "font"}
+SKIP_HOSTS = ("google-analytics", "googletagmanager", "doubleclick", "facebook",
+              "googleadservices", "googlesyndication", "clarity.ms", "hotjar")
 
 # Signs that the shop refused us instead of showing the product.
 BLOCK_CODES = {403, 429, 503}
@@ -144,19 +146,20 @@ def fetch_with_browser(url, pincode=PINCODE):
                           "response_start": body})
 
     counts = {"loaded": 0, "skipped": 0}
-    shop = urllib.parse.urlparse(url).hostname or ""
-    shop_site = ".".join(shop.split(".")[-2:])  # shop.amul.com -> amul.com
+    loaded_hosts, skipped_hosts = set(), set()
 
     def trim(route):
-        # The bot only needs the shop's page code and data. Skipping pictures,
-        # fonts and other sites' trackers cuts the load on Amul a lot.
+        # The bot only needs the page's code and data. Skipping pictures,
+        # fonts, video and ad/analytics trackers cuts the load a lot.
         req = route.request
         host = urllib.parse.urlparse(req.url).hostname or ""
-        if req.resource_type in SKIP_TYPES or not (host == shop or host.endswith(shop_site)):
+        if req.resource_type in SKIP_TYPES or any(t in host for t in SKIP_HOSTS):
             counts["skipped"] += 1
+            skipped_hosts.add(host)
             route.abort()
         else:
             counts["loaded"] += 1
+            loaded_hosts.add(host)
             route.continue_()
 
     with sync_playwright() as p:
@@ -176,7 +179,8 @@ def fetch_with_browser(url, pincode=PINCODE):
             if DEBUG_DIR:
                 cookies = [{"name": c["name"], "domain": c["domain"]} for c in page.context.cookies()]
                 save_debug("network.json", json.dumps(
-                    {"requests": counts, "calls": calls, "cookies": cookies}, indent=2))
+                    {"requests": counts, "loaded_hosts": sorted(loaded_hosts),
+                     "skipped_hosts": sorted(skipped_hosts), "calls": calls, "cookies": cookies}, indent=2))
                 _try_feed_directly(calls)
             return page.content() + "\n" + "\n".join(captured)
         finally:
