@@ -1,7 +1,15 @@
 {
   "requests": {
     "loaded": 66,
-    "skipped": 3777
+    "skipped": 3960
+  },
+  "skipped_unique": 81,
+  "skipped_by_type": {
+    ".png": 51,
+    ".jpg": 19,
+    ".woff2": 8,
+    ".js": 2,
+    ".woff": 1
   },
   "loaded_hosts": [
     "cdn.jsdelivr.net",
@@ -35,7 +43,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748409503:558:3cb95a2361ce4c81aac7319088f721e58dad0c5c881e50fdc1ec648247e8bd8e"
+        "tid": "1792749135590:385:470ce70ebd4438fd30e586611b2d7a51844737bd5edabd45d6f259cfb1f522f8"
       },
       "post_data": "",
       "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[],\"paging\":{\"limit\":1,\"start\":0,\"count\":1,\"total\":1,\"configurable_fields\":[\"price\",\"compare_price\",\"mrp_discount\",\"sku\",\"inventory_management\",\"inventory_allow_out_of_stock\",\"inventory_quantity\",\"barcode\",\"product_weight\",\"weight\",\"num_items\",\"min_limit_to_buy_this_product\",\"max_limit_to_buy_this_product\",\"spq\",\"tag\"]}}"
@@ -55,7 +63,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748409503:342:f4684923bee79300e79e4ae3db3f43c6ce410ed7846bdd3e3104c41507b84826"
+        "tid": "1792749135590:7:af3832d060ff2733ccbdcb8b303e308b4cb87c0152461077fbea0ebda0d35013"
       },
       "post_data": "",
       "response_start": "{\"messages\":[{\"name\":\"ms.entity.redirects.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[],\"paging\":{\"limit\":1,\"start\":0,\"count\":0,\"total\":0}}"
@@ -77,7 +85,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748414503:370:ab24a1936853421e16c269a9c3ec63d512864fb3dd43f6857a659e21e7f1bbc9"
+        "tid": "1792749140591:10:dfffb196aba0cce2320ff5a8fcef6bb1b4022482b7dc4632d59769298bb425f1"
       },
       "post_data": "{\"data\":{\"geolocation\":{\"_id\":\"6347edc30bf13f905934610c\",\"pin_code\":\"600001\",\"state_name\":\"Tamil Nadu\",\"district_name\":\"CHENNAI\",\"latitude\":\"13.0927822\",\"longitude\":\"80.29139990000002\",\"circle_name\":\"Tamilnadu Circle\",\"region_name\":\"Chennai City Region\",\"division_name\":\"Chennai GPO Division\",\"office_name\":\"Chennai G.P.O.\",\"delivery\":\"Delivery\",\"office_type\":\"HO\",\"update_date\":\"27-07-2022\",\"geolocation\":{\"latitude\":13.0927822,\"longitude\":80.29139990000002,\"point\":{\"type\":\"Point\",\"coordinates\":[80.29139990000002,13.0927822]}},\"_updated_by\":\"530d7f8bc6b8283a11000003\",\"city_name\":\"Chennai\",\"std_co",
       "response_start": "{\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":\"Updated successfully\",\"messages\":[{\"name\":\"ms.entity.settings.setPreferences\",\"level\":\"success\"}]}"
@@ -97,7 +105,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748416537:190:21b31b7d20364d9ce1bf8cd0084b157ac00cb30809b6bb3570b5d77f5fe16f54"
+        "tid": "1792749143930:821:4234dc126226401196988dade6196cfef37da6ebda65132fcf12a04d1f0de83f"
       },
       "post_data": "",
       "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"666d72e43f9749cf28eff026\",\"inventory_management\":\"automatic\",\"publish\":\"1\",\"location_availability_mode\":\"default\",\"substore\":[\"all\"],\"seller\":\"650006e7bad4464748be31d4\",\"approve\":\"approved\",\"alias\":\"amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/6a4e2160fdab14de18031795/01-hero-image_amul-whey-protein-carton-chocolateg-1020kg.png\"},{\"image\":\"666d7435bc63ee397eef666c/11-claims_amul-whey-protei"
@@ -117,7 +125,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748416537:9:887eedd5654bbf635d772f7d7ff258cbd3e40d070efaa72b3ba713c71470f1c9"
+        "tid": "1792749143930:784:74a8e0646ca76a5934a02da7c61d7cb37c883e8acbdc746105edd6f428014332"
       },
       "post_data": "",
       "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"666d72e43f9749cf28eff026\",\"seller\":\"650006e7bad4464748be31d4\",\"alias\":\"amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/6a4e2160fdab14de18031795/01-hero-image_amul-whey-protein-carton-chocolateg-1020kg.png\"},{\"image\":\"666d7435bc63ee397eef666c/11-claims_amul-whey-protein-1-02kg.jpg\"},{\"image\":\"666d73ff39fd0bdd2396f534/02-fop_amul-whey-protein-1-020kg.png\"},{\"image\":\"666d73ff652349dcbdefc8b4/03-b"
@@ -137,7 +145,7 @@
         "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": "\"Windows\"",
-        "tid": "1792748416537:699:dc9caa8acd32f0edb6b913efc202a8d4be16030bde505daa445961e9093e7c81"
+        "tid": "1792749143930:320:450ef2fe1a7e33124b58363328a058f107ae41116a1e96422be1ec9da593dba3"
       },
       "post_data": "",
       "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"69c807ee457a9ab1e4245340\",\"seller\":\"639c3fc69d3a6d5dc06e7c8c\",\"alias\":\"amul-high-protein-wheat-flour-65-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd0d3e9898c99f7cd7/01-hero-image_amul-high-protein-wheat-flour-195kg.png\"},{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd29b0a7b39c2ce8c5/02-fop_amul-high-protein-wheat-flour-195kg.png\"},{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd132693d4597145b7/03-bop_amul-high-prot"
