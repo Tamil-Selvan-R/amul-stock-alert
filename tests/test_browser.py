@@ -17,15 +17,17 @@ from check_stock import fetch_with_browser, parse_stock  # noqa: E402
 
 PAGE = """<!doctype html><html><body>
 <div id="modal"><input placeholder="Enter Your Pincode" id="pin">
-<ul id="list"></ul></div>
+<div id="automatic"><div id="list"></div></div></div>
 <div id="product">Loading...</div>
 <script>
 document.getElementById('pin').addEventListener('input', e => {
   if (e.target.value.length === 6)
-    document.getElementById('list').innerHTML = '<li id="opt">' + e.target.value + ' - Chennai</li>';
+    document.getElementById('list').innerHTML =
+      '<div>Showing result for "' + e.target.value + '"</div>' +
+      '<div><a id="opt" class="searchitem-name"><p>' + e.target.value + '</p></a></div>';
 });
 document.addEventListener('click', async e => {
-  if (e.target.id !== 'opt') return;
+  if (!e.target.closest('#opt')) return;
   document.getElementById('modal').remove();
   const r = await fetch('/api/products');
   const d = await r.json();

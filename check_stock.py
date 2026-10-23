@@ -149,15 +149,21 @@ def _enter_pincode(page, pincode):
     box = page.locator('input[placeholder*="incode" i], input[name*="pincode" i]').first
     if not box.count() or not box.is_visible():
         return
-    box.fill(pincode)
-    page.wait_for_timeout(2500)
-    # Amul lists matching areas under the box; pick the first one.
-    choice = page.get_by_text(pincode).first
-    if choice.count() and choice.is_visible():
+    box.click()
+    box.press_sequentially(pincode, delay=120)  # type like a person so the list appears
+    # Amul lists matches under the box as links; the line above them
+    # ("Showing result for ...") is not clickable, so pick the link itself.
+    choice = page.locator("#automatic a, .searchitem-name").filter(has_text=pincode).first
+    try:
+        choice.wait_for(state="visible", timeout=10000)
         choice.click()
-    else:
-        box.press("Enter")
-    page.wait_for_timeout(3000)
+    except Exception:
+        exact = page.get_by_text(pincode, exact=True).first
+        if exact.count() and exact.is_visible():
+            exact.click()
+        else:
+            box.press("Enter")
+    page.wait_for_timeout(4000)
 
 
 def _first_match(patterns, text):
