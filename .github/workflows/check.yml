@@ -2,7 +2,9 @@ name: Check Amul stock
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    # Every 15 minutes, offset from :00/:15/:30/:45 when GitHub is busiest
+    # and most likely to delay or drop scheduled runs.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
     inputs:
       test_message:
