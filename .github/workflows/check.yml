@@ -20,18 +20,28 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+
+      - name: Install browser
+        if: ${{ !inputs.test_message }}
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
 
       - name: Check stock
         env:
+          PINCODE: ${{ secrets.PINCODE }}
           WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
           CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TEST_MESSAGE: ${{ inputs.test_message && '1' || '0' }}
         run: python check_stock.py
 
@@ -42,5 +52,6 @@ jobs:
             git config user.email "stock-bot@users.noreply.github.com"
             git add state.json
             git commit -m "Update stock state"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
             git push
           fi

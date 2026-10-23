@@ -1,12 +1,16 @@
+import datetime
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from check_stock import parse_stock  # noqa: E402
+import check_stock  # noqa: E402
+from check_stock import keepalive, parse_stock, run  # noqa: E402
 
 OTHER = '<div class="p">WPVAN03_01 Vanilla Whey <span>Sold Out</span></div>'
 
+
+# --- reading the page -------------------------------------------------------
 
 def test_in_stock_ignores_other_products():
     html = OTHER + '<div>SKU: WPCCP03_01</div><span>In Stock</span><button>Add to Cart</button>' + OTHER
@@ -18,8 +22,16 @@ def test_out_of_stock():
     assert parse_stock(html) == "out"
 
 
-def test_sold_out_label():
-    assert parse_stock('<p>WPCCP03_01</p><b>Sold Out</b>') == "out"
+def test_out_of_stock_wording():
+    assert parse_stock("<p>WPCCP03_01</p><b>Sold Out</b>") == "out"
+    assert parse_stock("<p>WPCCP03_01</p><b>Notify Me</b>") == "out"
+    assert parse_stock("<p>WPCCP03_01</p><b>Not in stock</b>") == "out"
+    assert parse_stock("<p>WPCCP03_01</p><b>Currently unavailable</b>") == "out"
+
+
+def test_disabled_cart_button_after_sold_out_label():
+    html = '<p>WPCCP03_01</p><b>Sold Out</b><button disabled>Add to Cart</button>'
+    assert parse_stock(html) == "out"
 
 
 def test_json_data():
@@ -30,3 +42,69 @@ def test_json_data():
 def test_unknown_when_code_missing():
     assert parse_stock("<html><body>Please select your pincode</body></html>") == "unknown"
     assert parse_stock(OTHER) == "unknown"
+
+
+# --- deciding when to alert -------------------------------------------------
+
+class FakeNotify:
+    def __init__(self, delivered=True):
+        self.delivered = delivered
+        self.sent = []
+
+    def __call__(self, text):
+        self.sent.append(text)
+        return self.delivered
+
+
+def use_notify(monkeypatch, delivered=True):
+    fake = FakeNotify(delivered)
+    monkeypatch.setattr(check_stock, "notify", fake)
+    return fake
+
+
+def test_restock_alerts_once(monkeypatch):
+    sent = use_notify(monkeypatch).sent
+    state = {"status": "out", "failures": 0}
+    for status in ["out", "in", "in", "in"]:
+        state = run(state, status)
+    assert len(sent) == 1 and "Back in stock" in sent[0]
+    assert state["status"] == "in"
+
+
+def test_second_restock_alerts_again(monkeypatch):
+    sent = use_notify(monkeypatch).sent
+    state = {"status": "out", "failures": 0}
+    for status in ["in", "out", "in"]:
+        state = run(state, status)
+    assert len(sent) == 2
+
+
+def test_failed_delivery_is_retried(monkeypatch):
+    fake = use_notify(monkeypatch, delivered=False)
+    state = run({"status": "out", "failures": 0}, "in")
+    assert state["status"] == "out"  # not marked, so next run retries
+    fake.delivered = True
+    state = run(state, "in")
+    assert state["status"] == "in" and len(fake.sent) == 2
+
+
+def test_unknown_never_alerts_restock_and_warns_once(monkeypatch):
+    sent = use_notify(monkeypatch).sent
+    state = {"status": "out", "failures": 0}
+    for _ in range(20):
+        state = run(state, "unknown")
+    assert state["status"] == "out"
+    assert len(sent) == 1 and "couldn't read" in sent[0]
+    state = run(state, "out")
+    assert len(sent) == 2 and "again" in sent[1]
+    assert state["failures"] == 0
+
+
+def test_keepalive_monthly():
+    state = {}
+    keepalive(state, datetime.date(2026, 1, 1))
+    assert state["keepalive"] == "2026-01-01"
+    keepalive(state, datetime.date(2026, 1, 20))
+    assert state["keepalive"] == "2026-01-01"
+    keepalive(state, datetime.date(2026, 2, 5))
+    assert state["keepalive"] == "2026-02-05"
