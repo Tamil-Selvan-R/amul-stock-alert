@@ -1,0 +1,162 @@
+{
+  "calls": [
+    {
+      "method": "GET",
+      "url": "https://shop.amul.com/api/1/entity/ms.products?q=%7B%22alias%22:%22amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets%22%7D&limit=1",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "accept-language": "en-IN",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747320767:123:3d85aa04b437077184c6ca487831a8206b71bb002bea77ff77dd23c38f2960ff",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets"
+      },
+      "post_data": "",
+      "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[],\"paging\":{\"limit\":1,\"start\":0,\"count\":1,\"total\":1,\"configurable_fields\":[\"price\",\"compare_price\",\"mrp_discount\",\"sku\",\"inventory_management\",\"inventory_allow_out_of_stock\",\"inventory_quantity\",\"barcode\",\"product_weight\",\"weight\",\"num_items\",\"min_limit_to_buy_this_product\",\"max_limit_to_buy_this_product\",\"spq\",\"tag\"]}}"
+    },
+    {
+      "method": "GET",
+      "url": "https://shop.amul.com/api/1/entity/ms.redirects?filters[0][field]=old_url&filters[0][value]=%2Fproduct%2Famul-chocolate-whey-protein-34-g-or-pack-of-30-sachets&filters[0][operator]=equal&limit=1",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "ms-ga": "697363051.1792747322",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "accept-language": "en-IN",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747320767:245:4efd26c6cb550ab8bb0cc6ebe4cbde58c3b397175195221e4f88b02568de8494",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets"
+      },
+      "post_data": "",
+      "response_start": "{\"messages\":[{\"name\":\"ms.entity.redirects.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[],\"paging\":{\"limit\":1,\"start\":0,\"count\":0,\"total\":0}}"
+    },
+    {
+      "method": "PUT",
+      "url": "https://shop.amul.com/api/1/entity/ms.settings/_/setPreferences",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "ms-ga": "697363051.1792747322",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "accept-language": "en-IN",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747325767:764:81b68de231615535395c65b7abdaec5499c7907ca3a7b804b9964a6c4e72b70b",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "content-type": "application/json"
+      },
+      "post_data": "{\"data\":{\"geolocation\":{\"_id\":\"6347edc30bf13f905934610c\",\"pin_code\":\"600001\",\"state_name\":\"Tamil Nadu\",\"district_name\":\"CHENNAI\",\"latitude\":\"13.0927822\",\"longitude\":\"80.29139990000002\",\"circle_name\":\"Tamilnadu Circle\",\"region_name\":\"Chennai City Region\",\"division_name\":\"Chennai GPO Division\",\"office_name\":\"Chennai G.P.O.\",\"delivery\":\"Delivery\",\"office_type\":\"HO\",\"update_date\":\"27-07-2022\",\"geolocation\":{\"latitude\":13.0927822,\"longitude\":80.29139990000002,\"point\":{\"type\":\"Point\",\"coordinates\":[80.29139990000002,13.0927822]}},\"_updated_by\":\"530d7f8bc6b8283a11000003\",\"city_name\":\"Chennai\",\"std_co",
+      "response_start": "{\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":\"Updated successfully\",\"messages\":[{\"name\":\"ms.entity.settings.setPreferences\",\"level\":\"success\"}]}"
+    },
+    {
+      "method": "GET",
+      "url": "https://shop.amul.com/api/1/entity/ms.products?q=%7B%22alias%22:%22amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets%22%7D&limit=1",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "ms-ga": "697363051.1792747322",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "accept-language": "en-IN",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747327983:770:8e685b0413767f65d749ef8ea9683e62016df0c7259b155ecea74f6078cf7e05",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets"
+      },
+      "post_data": "",
+      "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"666d72e43f9749cf28eff026\",\"inventory_management\":\"automatic\",\"publish\":\"1\",\"location_availability_mode\":\"default\",\"substore\":[\"all\"],\"seller\":\"650006e7bad4464748be31d4\",\"approve\":\"approved\",\"alias\":\"amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/6a4e2160fdab14de18031795/01-hero-image_amul-whey-protein-carton-chocolateg-1020kg.png\"},{\"image\":\"666d7435bc63ee397eef666c/11-claims_amul-whey-protei"
+    },
+    {
+      "method": "GET",
+      "url": "https://shop.amul.com/api/1/entity/ms.products?fields[name]=1&fields[brand]=1&fields[categories]=1&fields[collections]=1&fields[alias]=1&fields[sku]=1&fields[price]=1&fields[compare_price]=1&fields[original_price]=1&fields[images]=1&fields[metafields]=1&fields[discounts]=1&fields[catalog_only]=1&fields[is_catalog]=1&fields[seller]=1&fields[available]=1&fields[inventory_quantity]=1&fields[net_quantity]=1&fields[num_reviews]=1&fields[avg_rating]=1&fields[inventory_low_stock_quantity]=1&fields[inventory_allow_out_of_stock]=1&fields[default_variant]=1&fields[variants]=1&fields[lp_seller_ids]=1&filters[0][field]=_id&filters[0][value][0]=666d72e43f9749cf28eff026&filters[0][operator]=in&filters[0][original]=1&limit=24&start=0&v=6&device_type=other&substore=66505ff578117873bb53b56a",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "ms-ga": "697363051.1792747322",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "accept-language": "en-IN",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747327983:735:b4bc1d2f3ba688b2cf9d013870c525d3a231ef5fed91d12a85d50150d9394ebe",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets"
+      },
+      "post_data": "",
+      "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"666d72e43f9749cf28eff026\",\"seller\":\"650006e7bad4464748be31d4\",\"alias\":\"amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/6a4e2160fdab14de18031795/01-hero-image_amul-whey-protein-carton-chocolateg-1020kg.png\"},{\"image\":\"666d7435bc63ee397eef666c/11-claims_amul-whey-protein-1-02kg.jpg\"},{\"image\":\"666d73ff39fd0bdd2396f534/02-fop_amul-whey-protein-1-020kg.png\"},{\"image\":\"666d73ff652349dcbdefc8b4/03-b"
+    },
+    {
+      "method": "GET",
+      "url": "https://shop.amul.com/api/1/entity/ms.products?fields[name]=1&fields[brand]=1&fields[categories]=1&fields[collections]=1&fields[alias]=1&fields[sku]=1&fields[price]=1&fields[compare_price]=1&fields[original_price]=1&fields[images]=1&fields[metafields]=1&fields[discounts]=1&fields[catalog_only]=1&fields[is_catalog]=1&fields[seller]=1&fields[available]=1&fields[inventory_quantity]=1&fields[net_quantity]=1&fields[num_reviews]=1&fields[avg_rating]=1&fields[inventory_low_stock_quantity]=1&fields[inventory_allow_out_of_stock]=1&fields[default_variant]=1&fields[variants]=1&fields[lp_seller_ids]=1&filters[0][field]=categories&filters[0][value][0]=protein&filters[0][operator]=in&filters[0][original]=1&filters[1][field]=_id&filters[1][value]=666d72e43f9749cf28eff026&filters[1][operator]=not_equal&filters[1][original]=1&limit=24&start=0&v=6&device_type=other&substore=66505ff578117873bb53b56a",
+      "status": 200,
+      "request_headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets",
+        "ms-ga": "697363051.1792747322",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "accept-language": "en-IN",
+        "sec-ch-ua-mobile": "?0",
+        "frontend": "1",
+        "tid": "1792747327983:67:37afbcfd1f8e2af4634b141a24005c6984fb90bade225e42366f3bf9a1f2356e",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "base_url": "https://shop.amul.com/en/product/amul-chocolate-whey-protein-34-g-or-pack-of-30-sachets"
+      },
+      "post_data": "",
+      "response_start": "{\"messages\":[{\"name\":\"ms.entity.products.list\",\"level\":\"success\"}],\"fileBaseUrl\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/\",\"data\":[{\"_id\":\"69c807ee457a9ab1e4245340\",\"seller\":\"639c3fc69d3a6d5dc06e7c8c\",\"alias\":\"amul-high-protein-wheat-flour-65-g-or-pack-of-30-sachets\",\"images\":[{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd0d3e9898c99f7cd7/01-hero-image_amul-high-protein-wheat-flour-195kg.png\"},{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd29b0a7b39c2ce8c5/02-fop_amul-high-protein-wheat-flour-195kg.png\"},{\"image\":\"s/62fa94df8c13af2e242eba16/69c813dd132693d4597145b7/03-bop_amul-high-prot"
+    }
+  ],
+  "cookies": [
+    {
+      "name": "jsessionid",
+      "domain": "shop.amul.com"
+    },
+    {
+      "name": "__cf_bm",
+      "domain": ".shop.amul.com"
+    },
+    {
+      "name": "_cfuvid",
+      "domain": ".shop.amul.com"
+    },
+    {
+      "name": "_ga",
+      "domain": ".amul.com"
+    },
+    {
+      "name": "_fbp",
+      "domain": ".amul.com"
+    },
+    {
+      "name": "fr",
+      "domain": ".facebook.com"
+    },
+    {
+      "name": "_gcl_au",
+      "domain": ".amul.com"
+    },
+    {
+      "name": "IDE",
+      "domain": ".doubleclick.net"
+    },
+    {
+      "name": "_ga_E69VZ8HPCN",
+      "domain": ".amul.com"
+    }
+  ]
+}
