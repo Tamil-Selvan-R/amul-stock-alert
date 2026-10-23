@@ -1,1 +1,1 @@
-status=unknown sku_found=False length=67517
+status=out sku_found=True length=285987
