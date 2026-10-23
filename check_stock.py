@@ -271,11 +271,36 @@ def send_telegram(text):
             f"https://api.telegram.org/bot{token}/sendMessage", data=data, timeout=30
         ) as resp:
             ok = json.load(resp).get("ok", False)
+    except urllib.error.HTTPError as exc:
+        # Telegram explains the problem, e.g. "Unauthorized" or "chat not found".
+        try:
+            reason = json.load(exc).get("description", "")
+        except Exception:
+            reason = ""
+        print(f"Telegram failed: HTTP {exc.code} {reason}")
+        save_debug("telegram.txt", f"HTTP {exc.code}: {reason}\n")
+        return False
     except Exception as exc:
         print("Telegram failed:", exc)
+        save_debug("telegram.txt", f"error: {type(exc).__name__}\n")
         return False
     print("Telegram:", "sent" if ok else "failed")
+    save_debug("telegram.txt", "sent\n" if ok else "not sent\n")
     return ok
+
+
+def describe_secrets():
+    """Which alert settings exist and look well formed. Never the values."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    lines = [
+        f"TELEGRAM_BOT_TOKEN set={bool(token)} looks_valid={bool(re.fullmatch(r'[0-9]{6,12}:[A-Za-z0-9_-]{30,}', token))}",
+        f"TELEGRAM_CHAT_ID set={bool(chat_id)} looks_valid={bool(re.fullmatch(r'-?[0-9]{5,16}', chat_id))}",
+        f"PINCODE set={bool(PINCODE)} looks_valid={bool(re.fullmatch(r'[0-9]{6}', PINCODE))}",
+        f"WHATSAPP_PHONE set={bool(os.environ.get('WHATSAPP_PHONE', '').strip())}",
+        f"CALLMEBOT_API_KEY set={bool(os.environ.get('CALLMEBOT_API_KEY', '').strip())}",
+    ]
+    return "\n".join(lines) + "\n"
 
 
 def notify(text):
@@ -351,6 +376,7 @@ def run(state, status, now=None, retry_after=0):
 
 def main():
     if os.environ.get("TEST_MESSAGE") == "1":
+        save_debug("secrets.txt", describe_secrets())
         ok = notify("✅ Amul stock bot is connected. You'll get a message here when it's back in stock.")
         return 0 if ok else 1
 
