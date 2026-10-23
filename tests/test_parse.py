@@ -153,3 +153,20 @@ def test_block_warning_says_blocked(monkeypatch):
     state = {"status": "out", "failures": 7}
     run(state, "blocked", now=NOW)
     assert "blocked" in sent[0]
+
+
+# --- shapes seen on the real Amul page (Oct 2026) ---------------------------
+
+def test_real_amul_page_out_of_stock():
+    html = ('<span itemprop="sku">WPCCP03_01</span><div itemprop="offers">'
+            '<span itemprop="price">2500</span>'
+            '<link itemprop="availability" href="https://schema.org/OutOfStock">Out of Stock</div>'
+            '{"sku":"WPCCP03_01","sort_order":0,"available":0,"variants":[],"inventory_quantity":1}')
+    assert parse_stock(html) == "out"
+
+
+def test_real_amul_page_in_stock():
+    html = ('<span itemprop="sku">WPCCP03_01</span><div itemprop="offers">'
+            '<link itemprop="availability" href="https://schema.org/InStock"></div>'
+            '{"sku":"WPCCP03_01","sort_order":0,"available":1,"inventory_quantity":42}')
+    assert parse_stock(html) == "in"
