@@ -52,6 +52,9 @@ HEADERS = {
     "Accept-Language": "en-IN,en;q=0.9",
 }
 
+# Browser requests the bot doesn't need.
+SKIP_TYPES = {"image", "media", "font"}
+
 # Signs that the shop refused us instead of showing the product.
 BLOCK_CODES = {403, 429, 503}
 BLOCK_MARKERS = [
@@ -140,10 +143,27 @@ def fetch_with_browser(url, pincode=PINCODE):
                           "request_headers": headers, "post_data": (req.post_data or "")[:600],
                           "response_start": body})
 
+    counts = {"loaded": 0, "skipped": 0}
+    shop = urllib.parse.urlparse(url).hostname or ""
+    shop_site = ".".join(shop.split(".")[-2:])  # shop.amul.com -> amul.com
+
+    def trim(route):
+        # The bot only needs the shop's page code and data. Skipping pictures,
+        # fonts and other sites' trackers cuts the load on Amul a lot.
+        req = route.request
+        host = urllib.parse.urlparse(req.url).hostname or ""
+        if req.resource_type in SKIP_TYPES or not (host == shop or host.endswith(shop_site)):
+            counts["skipped"] += 1
+            route.abort()
+        else:
+            counts["loaded"] += 1
+            route.continue_()
+
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"])
         try:
             page = browser.new_page(user_agent=USER_AGENT, locale="en-IN")
+            page.route("**/*", trim)
             page.on("response", on_response)
             resp = page.goto(url, wait_until="domcontentloaded", timeout=45000)
             if resp and resp.status in BLOCK_CODES:
@@ -155,10 +175,32 @@ def fetch_with_browser(url, pincode=PINCODE):
             page.wait_for_timeout(2000)
             if DEBUG_DIR:
                 cookies = [{"name": c["name"], "domain": c["domain"]} for c in page.context.cookies()]
-                save_debug("network.json", json.dumps({"calls": calls, "cookies": cookies}, indent=2))
+                save_debug("network.json", json.dumps(
+                    {"requests": counts, "calls": calls, "cookies": cookies}, indent=2))
+                _try_feed_directly(calls)
             return page.content() + "\n" + "\n".join(captured)
         finally:
             browser.close()
+
+
+def _try_feed_directly(calls):
+    """Debug only: ask the stock feed once, without the page's signed `tid`
+    header, to learn whether a plain request is accepted."""
+    feed = next((c["url"] for c in calls if "fields[available]" in c["url"]
+                 and "filters[0][field]=_id" in c["url"]), None)
+    if not feed:
+        save_debug("direct.txt", "no stock feed call seen\n")
+        return
+    req = urllib.request.Request(feed, headers={**HEADERS, "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+            result = f"HTTP {resp.status} has_available={'\"available\"' in body}\n{body[:300]}\n"
+    except urllib.error.HTTPError as exc:
+        result = f"HTTP {exc.code}\n{exc.read()[:300].decode('utf-8', 'replace')}\n"
+    except Exception as exc:
+        result = f"error {type(exc).__name__}: {exc}\n"
+    save_debug("direct.txt", result)
 
 
 def _enter_pincode(page, pincode):
