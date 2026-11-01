@@ -1,7 +1,5 @@
 {
   "status": "in",
-  "failures": 1,
-  "keepalive": "2026-10-23",
-  "blocks": 1,
-  "backoff_until": "2026-11-01T18:01:20.815629+00:00"
+  "failures": 0,
+  "keepalive": "2026-10-23"
 }
